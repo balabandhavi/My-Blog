@@ -30,7 +30,7 @@ document.addEventListener('DOMContentLoaded',()=>{
                 });
 
                 const data=await response.json();
-                displayMessage.textContent=`Server says: ${data.reply}`;
+                displayMessage.textContent=`${data.serverReply}`;
                 input.value='';
             }catch(error){
                 displayMessage.textContent='Error communicating with the server.';
@@ -42,3 +42,41 @@ document.addEventListener('DOMContentLoaded',()=>{
     });
 
 });
+
+//document.addEventListener('DOMContentLoaded',async()=>{
+    //const displayMessage=document.getElementById('displayMessage');
+
+    // try{
+    //     const response=await fetch('/messages');
+    //     const data = await response.json();
+
+    //     if(data.messages.length >0){
+    //         displayMessage.textContent=`Previous messages: ${data.messages.join(', ')}`;
+    //     }else{
+    //         displayMessage.textContent='No messages yet.';
+    //     }
+    // }catch(error){
+    //     displayMessage.textContent='Error fetching messages.';
+    //     console.error('Error: ',error);        
+    // }
+
+   
+//});
+
+async function fetchMessages(){
+    try{
+        const response=await fetch('/messages');
+        const data = await response.json();
+
+        const messagesList=document.getElementById('messages-list');
+        messagesList.innerHTML='';
+
+        data.forEach(msg=>{
+            const listItem=document.createElement('li');
+            listItem.textContent= `${msg.message} \t\t ${msg.timestamp}`;
+            messagesList.appendChild(listItem);
+        });
+    }catch(error){
+        console.error('Error fetching messages:',error);
+    }
+}

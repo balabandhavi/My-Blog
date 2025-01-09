@@ -4,17 +4,27 @@ const app=express();
 const PORT=3000;
 
 app.use(express.static('public'));
+app.use(express.json());
 
 app.get('/',(req,res)=>{
     res.sendFile(MY-BLOG+'/public/index.html');
 });
 
-app.post('/process-message',express.json(),(req,res)=>{
-    const userMessage=req.body.message;
-    console.log(`Received message: ${userMessage}`);
+const messages= [];
 
-    const serverReply=`Hello, you said "${userMessage}"!`;
-    res.json({reply:serverReply});
+app.post('/process-message',(req,res)=>{
+    const {message}=req.body;
+    const timestamp=new Date().toLocaleString();
+    // console.log(`Received message: ${userMessage}`);
+
+    messages.push({message,timestamp});
+
+    const serverReply=`Hello!, you said "${message}"!`;
+    res.json({success:true, serverReply});
+});
+
+app.get('/messages',(req,res)=>{
+    res.json(messages );
 });
 
 app.listen(PORT,()=>{
