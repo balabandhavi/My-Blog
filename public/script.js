@@ -73,14 +73,38 @@ async function fetchMessages(){
 
         data.forEach(msg=>{
             const listItem=document.createElement('li');
-            listItem.textContent= `${msg.message} \t\t ${msg.timestamp}`;
+            listItem.textContent= `${msg.message} \t\t ${msg.timestamp}\t`;
+
+            const deleteButton = document.createElement('button');
+            deleteButton.textContent='Delete';
+            deleteButton.onclick=async()=>{
+                await deleteAllMessages(msg.timestamp);
+                fetchMessages();
+            };
+
+            listItem.appendChild(deleteButton);
             messagesList.appendChild(listItem);
         });
+    
     }catch(error){
         console.error('Error fetching messages:',error);
     }
 }
 
+async function deleteMessage(timestamp){
+    try{
+        const response=await fetch('/messages/${timestamp}',{
+            method: 'DELETE',
+        });
+
+        const result=await response.json();
+        if(!result.success){
+            console.error('Error deleting message:',result.error);
+        }
+    }catch(error){
+        console.error('Error deleting message:',error);
+    }
+}
 async function deleteAllMessages(){
     try{
         const response=await fetch('/messages',
