@@ -27,6 +27,11 @@ app.get('/messages',(req,res)=>{
     res.json(messages );
 });
 
+app.delete('/messages',(req,res)=>{
+    messages.length=0;
+    res.json({success:true, message: 'All mssages deleted successfully!'});
+});
+
 app.listen(PORT,()=>{
     console.log(`Server is running on http://localhost:${PORT}`);
 });

@@ -80,3 +80,21 @@ async function fetchMessages(){
         console.error('Error fetching messages:',error);
     }
 }
+
+async function deleteAllMessages(){
+    try{
+        const response=await fetch('/messages',
+            {method: 'DELETE'});
+        
+        const data=await response.json();
+
+        if(data.success){
+            const messagesList=document.getElementById('messages-list');
+            messagesList.innerHTML='';
+            alert(data.message);
+        }
+    }catch(error){
+        console.error('Error deleting messages:',error);
+        alert('Failed to delete messages. Please try again.');
+    }
+}
