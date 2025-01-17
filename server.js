@@ -1,12 +1,22 @@
 
+require('dotenv').config(); // dotenv is for managing environment variables securely
+
 const express = require('express');
+
+const bcrypt=require('bcryptjs');  // bcryptjs is for hashing passwords securely
+const jwt=require('jsonwebtoken'); //jsonwebtoken is to generate JWT tokens for authentication
+const cors=require('cors');  // cors it to allow cross-origin requests
+
 const {Pool}=require('pg');//importing pg for PostgreSQL
+
+
 const app=express();
 const PORT=3000;
 
 //Middleware
 app.use(express.static('public'));
 app.use(express.json());
+app.use(cors());
 
 
 const logger =(req,res,next)=>{
@@ -23,28 +33,17 @@ const errorHandler=(err,req,res,next)=>{
 
 app.use(errorHandler);
 
-// POOL class creates a connection pool,which is group of resuable connections to the database
-//it allows multiple queries to be executed concurrently
-//it is bes for applications with multiple simultaneous databse queries or when we need efficient connection management
 
 
 const pool=new Pool({
-    user: 'postgres',
-    host: 'localhost',
-    database: 'messages_app',
-    password: 'Radhika@1980',
-    port: 5432,
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PASSWORD,
+    port: process.env.DB_PORT,
 });
 
-// const db=new pg.Client({
-//     user : "postgres",
-//     host : "localhost",
-//     database :"world",
-//     password:"Radhika@1980",
-//     port: 5432,
-// });
-
-//We won't be using Client class here.it creates a single connection to the database
+const SECRET_KEY=process.env.JWT_SECRET;
 
 app.get('/',(req,res)=>{
     res.sendFile(MY-BLOG+'/public/index.html');
@@ -52,16 +51,90 @@ app.get('/',(req,res)=>{
 
 const messages= [];
 
-// app.post('/process-message',(req,res)=>{
-//     const {message}=req.body;
-//     const timestamp=new Date().toLocaleString();
-//     // console.log(`Received message: ${userMessage}`);
+app.post('/signup', async(req,res)=>{
+    const {email, password}= req.body;
 
-//     messages.push({message,timestamp});
+    try{
+        const hashedPassword=await bcrypt.hash(password,10);
 
-//     const serverReply=`Hello!, you said "${message}"!`;
-//     res.json({success:true, serverReply});
-// });
+        const result=await pool.query(
+            'INSERT INTO users (email, password) VALUES ($1,$2) RETURNING id,email',
+            [email, hashedPassword]
+        );
+
+        res.status(201).json({ 
+            message: 'User registered successfully',
+            user:result.rows[0]
+        });
+
+    } catch(error){
+
+        console.error('Signup error: ',error);
+        res.status(500).json({
+            error: 'Failed to register user'
+        });
+    }
+});
+
+app.post('/login',async(req,res)=>{
+    
+    const { email ,password}=req.body;
+
+    try{
+
+        const result=await pool.query('SELECT * FROM users WHERE email =$1',
+            [email]
+        );
+
+        if(result.rows.length === 0){
+            return res.status(401).json({
+                error: 'Invalid email or password'});
+        }
+
+        const user=result.rows[0];
+
+        const isMatch = await bcrypt.compare(password,user.password);
+        if(!isMatch){
+            return res.status(401).json({error: 'Invalid email or password' });
+        }
+
+        const token =jwt.sign({
+            userId: user.id,
+            email: user.email
+        },SECRET_KEY,{
+            expiresIn: '1h'
+        });
+
+        res.json({
+            message: 'Login successful',
+            token
+        });
+
+    }catch (error){
+        console.error('Login error: ', error);
+        res.status(500).json({ error: 'Failed to log in'});
+    }
+
+});
+
+const authenticateToken=(req,res,next)=>{
+    const token = req.headers['authorization'];
+
+    if(!token){
+        return res.status(403).json({error: 'Access denied'});
+    }
+
+    jwt.verify(token,SECRET_KEY,(err,user)=>{
+        if(err) return res.status(403).json({error: 'Invalid token'});
+        req.user=user;
+        next();
+    });
+};
+
+app.get('/protected', authenticateToken,(req,res)=>{
+    res.json({message: `Welcome, ${req.user.email}! You have access to this route.`});
+});
+
 
 app.get('/messages',async(req,res)=>{
     try{
@@ -211,3 +284,56 @@ app.delete('/messages/:timestamp',(req,res)=>{
 app.listen(PORT,()=>{
     console.log(`Server is running on http://localhost:${PORT}`);
 });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+// POOL class creates a connection pool,which is group of resuable connections to the database
+//it allows multiple queries to be executed concurrently
+//it is bes for applications with multiple simultaneous databse queries or when we need efficient connection management
+
+
+
+
+// const db=new pg.Client({
+//     user : "postgres",
+//     host : "localhost",
+//     database :"world",
+//     password:"Radhika@1980",
+//     port: 5432,
+// });
+
+//We won't be using Client class here.it creates a single connection to the database
+
+
+
+
+
+// app.post('/process-message',(req,res)=>{
+//     const {message}=req.body;
+//     const timestamp=new Date().toLocaleString();
+//     // console.log(`Received message: ${userMessage}`);
+
+//     messages.push({message,timestamp});
+
+//     const serverReply=`Hello!, you said "${message}"!`;
+//     res.json({success:true, serverReply});
+// });
