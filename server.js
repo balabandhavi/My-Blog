@@ -2,6 +2,7 @@
 require('dotenv').config(); // dotenv is for managing environment variables securely
 
 const express = require('express');
+const bodyParser=require('body-parser');
 
 const bcrypt=require('bcryptjs');  // bcryptjs is for hashing passwords securely
 const jwt=require('jsonwebtoken'); //jsonwebtoken is to generate JWT tokens for authentication
@@ -14,6 +15,7 @@ const app=express();
 const PORT=3000;
 
 //Middleware
+app.use(bodyParser.json());
 app.use(express.static('public'));
 app.use(express.json());
 app.use(cors());
@@ -45,76 +47,64 @@ const pool=new Pool({
 
 const SECRET_KEY=process.env.JWT_SECRET;
 
+const path = require("path");
+
 app.get('/',(req,res)=>{
-    res.sendFile(MY-BLOG+'/public/index.html');
+    res.sendFile(path.join(__dirname, "public", "index.html"));
 });
 
-const messages= [];
+app.post('/signup', async (req, res) => {
+    const { email, password } = req.body;
 
-app.post('/signup', async(req,res)=>{
-    const {email, password}= req.body;
+    try {
+        
+        const userExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        if (userExists.rows.length > 0) {
+            return res.json({ success: false, message: 'User already exists' });
+        }
 
-    try{
-        const hashedPassword=await bcrypt.hash(password,10);
-
-        const result=await pool.query(
-            'INSERT INTO users (email, password) VALUES ($1,$2) RETURNING id,email',
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const result = await pool.query(
+            'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email',
             [email, hashedPassword]
         );
 
-        res.status(201).json({ 
+        res.status(201).json({
+            success: true,
             message: 'User registered successfully',
-            user:result.rows[0]
+            user: result.rows[0]
         });
 
-    } catch(error){
-
-        console.error('Signup error: ',error);
-        res.status(500).json({
-            error: 'Failed to register user'
-        });
+    } catch (error) {
+        console.error('Signup error: ', error);
+        res.status(500).json({ error: 'Failed to register user' });
     }
 });
 
-app.post('/login',async(req,res)=>{
-    
-    const { email ,password}=req.body;
+app.post('/login', async (req, res) => {
+    const { email, password } = req.body;
 
-    try{
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
 
-        const result=await pool.query('SELECT * FROM users WHERE email =$1',
-            [email]
-        );
-
-        if(result.rows.length === 0){
-            return res.status(401).json({
-                error: 'Invalid email or password'});
+        if (result.rows.length === 0) {
+            return res.status(401).json({ error: 'Invalid email or password' });
         }
 
-        const user=result.rows[0];
-
-        const isMatch = await bcrypt.compare(password,user.password);
-        if(!isMatch){
-            return res.status(401).json({error: 'Invalid email or password' });
+        const user = result.rows[0];
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            return res.status(401).json({ error: 'Invalid email or password' });
         }
 
-        const token =jwt.sign({
-            userId: user.id,
-            email: user.email
-        },SECRET_KEY,{
-            expiresIn: '1h'
-        });
+        const token = jwt.sign({ userId: user.id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
 
-        res.json({
-            message: 'Login successful',
-            token
-        });
+        res.json({ success: true, message: 'Login successful', token });
 
-    }catch (error){
+    } catch (error) {
         console.error('Login error: ', error);
-        res.status(500).json({ error: 'Failed to log in'});
+        res.status(500).json({ error: 'Failed to log in' });
     }
-
 });
 
 const authenticateToken=(req,res,next)=>{
@@ -135,6 +125,7 @@ app.get('/protected', authenticateToken,(req,res)=>{
     res.json({message: `Welcome, ${req.user.email}! You have access to this route.`});
 });
 
+const messages= [];
 
 app.get('/messages',async(req,res)=>{
     try{
@@ -246,7 +237,7 @@ app.post('/process-message',async(req,res)=>{
 
     try{
         const result=await pool.query(
-            'INSERT INTO messages (message) VALUES ($1) RETRNING *',
+            'INSERT INTO messages (message) VALUES ($1) RETURNING *',
             [message]
         );
 

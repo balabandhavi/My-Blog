@@ -43,25 +43,7 @@ document.addEventListener('DOMContentLoaded',()=>{
 
 });
 
-//document.addEventListener('DOMContentLoaded',async()=>{
-    //const displayMessage=document.getElementById('displayMessage');
 
-    // try{
-    //     const response=await fetch('/messages');
-    //     const data = await response.json();
-
-    //     if(data.messages.length >0){
-    //         displayMessage.textContent=`Previous messages: ${data.messages.join(', ')}`;
-    //     }else{
-    //         displayMessage.textContent='No messages yet.';
-    //     }
-    // }catch(error){
-    //     displayMessage.textContent='Error fetching messages.';
-    //     console.error('Error: ',error);        
-    // }
-
-   
-//});
 
 async function fetchMessages(){
     try{
@@ -122,3 +104,39 @@ async function deleteAllMessages(){
         alert('Failed to delete messages. Please try again.');
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+//document.addEventListener('DOMContentLoaded',async()=>{
+    //const displayMessage=document.getElementById('displayMessage');
+
+    // try{
+    //     const response=await fetch('/messages');
+    //     const data = await response.json();
+
+    //     if(data.messages.length >0){
+    //         displayMessage.textContent=`Previous messages: ${data.messages.join(', ')}`;
+    //     }else{
+    //         displayMessage.textContent='No messages yet.';
+    //     }
+    // }catch(error){
+    //     displayMessage.textContent='Error fetching messages.';
+    //     console.error('Error: ',error);        
+    // }
+
+   
+//});

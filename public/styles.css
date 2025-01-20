@@ -1,26 +1,86 @@
-body{
-    font-family: 'Times New Roman', Times, sans-serif;
+/* Apply a modern font */
+body {
+    font-family: 'Poppins', sans-serif;
     margin: 0;
     padding: 0;
     background-color: #7E99A3;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
     color: antiquewhite;
 }
 
-header{
-    background-color:#4C585B ;
-    color: beige;
+/* Center Forms Properly */
+#login-form, #signup-form {
+    background-color: #ffffff;
+    padding: 25px;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    width: 320px;
+    max-width: 100%;
     text-align: center;
-    padding: 10px;
+    margin-top: 30px;
 }
 
-main{
-    padding: 20px;
-    text-align:center;
+/* Titles */
+h1 {
+    text-align: center;
+    color: #001F3F;
+    font-size: 24px;
+    margin-bottom: 15px;
 }
 
-footer{
-    background-color:#A5BFCC ;
-    color:wheat;
+/* Label Styles */
+label {
+    font-size: 14px;
+    color: #333;
+    font-weight: 600;
+    display: block;
+    text-align: left;
+    margin-bottom: 5px;
+}
+
+/* Input Fields */
+input[type="email"], input[type="password"] {
+    width: 100%;
+    padding: 12px;
+    margin: 10px -10px;
+
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+    background-color: #f8f8f8;
+    transition: border 0.3s ease-in-out;
+}
+
+input[type="email"]:focus, input[type="password"]:focus {
+    border-color: #007bff;
+    outline: none;
+}
+
+/* Button Styling */
+button {
+    width: 100%;
+    padding: 12px;
+    background-color: #0056b3;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: background-color 0.3s ease-in-out;
+}
+
+button:hover {
+    background-color: #003d7a;
+}
+
+/* Footer Styling */
+footer {
+    background-color: #4C585B;
+    color: wheat;
     text-align: center;
     padding: 10px;
     position: fixed;
@@ -28,38 +88,24 @@ footer{
     bottom: 0;
 }
 
-form{
-    margin: 20px 0;
+/* Error & Success Messages */
+.error {
+    color: red;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
 }
 
-input{
-    padding: 10px;
-    margin-right: 10px;
-    border: 1px solid #001F3F;
-    border-radius: 5px;
+.success {
+    color: green;
+    font-size: 14px;
+    text-align: center;
+    margin-top: 10px;
 }
 
-button{
-    padding: 10px 20px;
-    background-color: #1E2A5E;
-    color:whitesmoke;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-}
-
-button:hover{
-    background-color: black;
-}
-
-#displayMessage{
-    margin-top: 20px;
-    font-weight: bold;
-    color: white;
-}
-
-#messages-list{
-    margin-top: 20px;
-    font-weight: bold;
-    color: white;;
+#caption{
+    font-family: Georgia, 'Times New Roman', Times, serif;
+    font-size: large;
+    font-weight: bolder;
+    color: crimson;
 }
