@@ -107,6 +107,16 @@ app.post('/login', async (req, res) => {
     }
 });
 
+app.post('/logout', (req, res) => {
+    req.session.destroy((err) => {  // If using sessions
+        if (err) {
+            return res.status(500).json({ message: 'Logout failed' });
+        }
+        res.json({ message: 'Logged out successfully' });
+    });
+});
+
+
 const authenticateToken=(req,res,next)=>{
     const token = req.headers['authorization'];
 
