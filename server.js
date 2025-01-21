@@ -1,4 +1,3 @@
-
 require('dotenv').config(); // dotenv is for managing environment variables securely
 
 const express = require('express');

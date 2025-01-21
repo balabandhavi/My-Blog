@@ -1,4 +1,3 @@
-
 document.addEventListener('DOMContentLoaded',()=>{
     //for calendar
     const button=document.getElementById('showDateButton');
