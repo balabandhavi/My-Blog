@@ -190,7 +190,7 @@ app.get('/messages',async(req,res)=>{
 
 app.post('/process-message',async(req,res)=>{
     const {message}=req.body;
-    if(!message){
+    if(!message || message.trim()===''){
         return res.status(400).json({error:'Message is required!'});
     }
     try{
@@ -273,34 +273,6 @@ app.delete('/messages/:id', async(req,res)=>{
         });
     }
 });
-
-app.post('/process-message',async(req,res)=>{
-
-    const {message}=req.body;
-
-    if(!message || message.trim()===''){
-        return res.status(400).json({error: 'Message cannot be empty.'});
-    }
-
-    try{
-        const result=await pool.query(
-            'INSERT INTO messages (message) VALUES ($1) RETURNING *',
-            [message]
-        );
-
-        res.json({
-            success:true,
-            newMessage: result.rows[0]
-        });
-    }catch(error) {
-        console.error('Error adding message: ',error);
-        res.status(500).json({
-            error: 'Internal Server Error'
-        });
-    }
-});
-
-
 
 app.delete('/messages',(req,res)=>{
     messages.length=0;
