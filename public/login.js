@@ -20,7 +20,8 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (response.ok) {
                 localStorage.setItem("token", data.token); 
-                window.location.href = "index.html"; 
+                window.location.href = "/home.html";  
+
             } else {
                 alert(data.error || "Login failed. Please try again.");
             }

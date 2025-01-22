@@ -46,6 +46,15 @@ const pool=new Pool({
 
 const SECRET_KEY=process.env.JWT_SECRET;
 
+const session=require('express-session');
+
+app.use(session({
+    secret:SECRET_KEY,
+    resave:false,
+    saveUninitialized:false,
+    cookie: {secure:false}
+}));
+
 const path = require("path");
 
 app.get('/',(req,res)=>{
@@ -96,9 +105,11 @@ app.post('/login', async (req, res) => {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
 
+        req.session.user={email: email};
         const token = jwt.sign({ userId: user.id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
 
         res.json({ success: true, message: 'Login successful', token });
+
 
     } catch (error) {
         console.error('Login error: ', error);
@@ -106,14 +117,41 @@ app.post('/login', async (req, res) => {
     }
 });
 
+app.get('/get-user', (req,res)=>{
+    console.log("Session user: ", req.session.user);
+    if(req.session.user){
+        res.json({
+            user:req.session.user
+        });
+    }else{
+        res.json({
+            user: null
+        });
+    }
+});
+
+app.get('/home',(req,res)=>{
+    
+    if(req.session.user){
+        res.sendFile(path.join(__dirname, "public", "home.html"));    
+    }else{
+        res.redirect('./public/login.html');
+    }
+});
+
+
+
 app.post('/logout', (req, res) => {
-    req.session.destroy((err) => {  // If using sessions
+    req.session.destroy((err) => {  
         if (err) {
             return res.status(500).json({ message: 'Logout failed' });
         }
-        res.json({ message: 'Logged out successfully' });
+        
+        res.clearCookie('connect.sid'); 
+        res.json({ message: 'Logout successful' }); 
     });
 });
+
 
 
 const authenticateToken=(req,res,next)=>{

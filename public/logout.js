@@ -1,5 +1,6 @@
+
 document.addEventListener('DOMContentLoaded', function () {
-    const logoutButton = document.getElementById('logout-button');
+    const logoutButton = document.getElementById('logoutButton');
 
     if (logoutButton) {
         logoutButton.addEventListener('click', async function () {
@@ -8,7 +9,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
                 if (response.ok) {
                     alert('Logged out successfully!');
-                    window.location.href = '/login.html';  
+                    window.location.href = '/index.html';  
                 } else {
                     alert('Logout failed. Please try again.');
                 }
