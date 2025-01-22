@@ -1,17 +1,19 @@
 
-document.addEventListener('DOMContentLoaded',function(){
+document.addEventListener('DOMContentLoaded',async function(){
 
+    const userEmailSpan = document.getElementById('user-email');
+    
     try {
-        const response = fetch('/get-user');
-        const data =  response.json();
+        const response = await fetch('/get-user'); 
+        const data = await response.json();
 
-        if (data.user && data.user.email) {
-            document.getElementById('user-email').textContent = data.user.email;
+        if (data.user) {
+            userEmailSpan.textContent = data.user; 
         } else {
-            document.getElementById('user-email').textContent = 'Guest'; 
+            userEmailSpan.textContent = 'Guest'; 
         }
     } catch (error) {
-        console.error('Error fetching user data:', error);
+        console.error('Error fetching user:', error);
     }
 
     logoutButton.addEventListener('click',async ()=>{

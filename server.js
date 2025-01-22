@@ -121,7 +121,7 @@ app.get('/get-user', (req,res)=>{
     console.log("Session user: ", req.session.user);
     if(req.session.user){
         res.json({
-            user:req.session.user
+            user:req.session.user.email
         });
     }else{
         res.json({
