@@ -62,25 +62,32 @@ app.get('/',(req,res)=>{
 });
 
 app.post('/signup', async (req, res) => {
-    const { email, password } = req.body;
+    const { firstName, middleName, lastName, userId, email, password } = req.body;
 
     try {
         
-        const userExists = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        const userExists = await pool.query(
+            'SELECT * FROM users WHERE userId = $1 OR email = $2',
+            [userId, email]
+        );
+
         if (userExists.rows.length > 0) {
-            return res.json({ success: false, message: 'User already exists' });
+            return res.status(400).json({ success: false, message: 'User ID or Email already exists' });
         }
 
         const hashedPassword = await bcrypt.hash(password, 10);
         const result = await pool.query(
-            'INSERT INTO users (email, password) VALUES ($1, $2) RETURNING id, email',
-            [email, hashedPassword]
+            'INSERT INTO users (firstName, middleName, lastName, userId, email, password) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, email',
+            [firstName, middleName, lastName, userId, email, hashedPassword]
         );
 
         res.status(201).json({
             success: true,
             message: 'User registered successfully',
-            user: result.rows[0]
+            user: {
+                userId: result.rows[0].userId,
+                email: result.rows[0].email
+            }
         });
 
     } catch (error) {
@@ -90,23 +97,23 @@ app.post('/signup', async (req, res) => {
 });
 
 app.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { userId, password } = req.body;
 
     try {
-        const result = await pool.query('SELECT * FROM users WHERE email = $1', [email]);
+        const result = await pool.query('SELECT * FROM users WHERE userId = $1', [userId]);
 
         if (result.rows.length === 0) {
-            return res.status(401).json({ error: 'Invalid email or password' });
+            return res.status(401).json({ error: 'Invalid userId or password' });
         }
 
         const user = result.rows[0];
         const isMatch = await bcrypt.compare(password, user.password);
         if (!isMatch) {
-            return res.status(401).json({ error: 'Invalid email or password' });
+            return res.status(401).json({ error: 'Invalid userId or password' });
         }
 
-        req.session.user={email: email};
-        const token = jwt.sign({ userId: user.id, email: user.email }, SECRET_KEY, { expiresIn: '1h' });
+        req.session.user = { userId: user.userid};
+        const token = jwt.sign({ userId: user.userid}, SECRET_KEY, { expiresIn: '1h' });
 
         res.json({ success: true, message: 'Login successful', token });
 
@@ -119,10 +126,8 @@ app.post('/login', async (req, res) => {
 
 app.get('/get-user', (req,res)=>{
     console.log("Session user: ", req.session.user);
-    if(req.session.user){
-        res.json({
-            user:req.session.user.email
-        });
+    if (req.session.user.userId) {
+        return res.json({ user: req.session.user.userId });
     }else{
         res.json({
             user: null

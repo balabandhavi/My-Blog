@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", function () {
     loginForm.addEventListener("submit", async function (event) {
         event.preventDefault(); // Prevent default form submission
 
-        const email = document.getElementById("email").value;
+        const userId = document.getElementById("userId").value;
         const password = document.getElementById("password").value;
 
         try {
@@ -13,7 +13,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 headers: {
                     "Content-Type": "application/json",
                 },
-                body: JSON.stringify({ email, password }),
+                body: JSON.stringify({ userId, password }),
             });
 
             const data = await response.json();

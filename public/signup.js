@@ -4,6 +4,10 @@ document.addEventListener('DOMContentLoaded', function () {
     signupForm.addEventListener('submit', async function (event) {
         event.preventDefault(); 
 
+        const firstName=document.getElementById('first-name');
+        const middleName=document.getElementById('middle-name');
+        const lastName=document.getElementById('last-name');
+        const userId=document.getElementById('userId');
         const email = document.getElementById('email');
         const password = document.getElementById('password');
 
@@ -16,7 +20,14 @@ document.addEventListener('DOMContentLoaded', function () {
             const response = await fetch('/signup', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email: email.value, password: password.value }) // Fix: Send values
+                body: JSON.stringify({
+                    firstName:firstName.value,
+                    lastName:lastName.value,
+                    middleName:middleName ? middleName.value : '',
+                    userId:userId.value,
+                    email: email.value,
+                    password: password.value 
+                }) 
             });
 
             const data = await response.json();

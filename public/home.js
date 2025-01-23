@@ -1,16 +1,16 @@
 
 document.addEventListener('DOMContentLoaded',async function(){
 
-    const userEmailSpan = document.getElementById('user-email');
+    const userIdSpan = document.getElementById('user-id');
     
     try {
         const response = await fetch('/get-user'); 
         const data = await response.json();
 
         if (data.user) {
-            userEmailSpan.textContent = data.user; 
+            userIdSpan.textContent = data.user; 
         } else {
-            userEmailSpan.textContent = 'Guest'; 
+            userIdSpan.textContent = 'Guest'; 
         }
     } catch (error) {
         console.error('Error fetching user:', error);
