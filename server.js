@@ -284,17 +284,6 @@ app.delete('/messages',(req,res)=>{
     res.json({success:true, message: 'All mssages deleted successfully!'});
 });
 
-app.delete('/messages/:timestamp',(req,res)=>{
-    const {timestamp}=req.params;
-    const index=messages.findIndex(msg=> msg.timestamp===timestamp);
-
-    if(index!== -1){
-        messages.splice(index,1);
-        res.json({success:true});
-    }else{
-        res.status(404).json({success:false,error: 'Message not found'});
-    }
-});
 
 app.listen(PORT,()=>{
     console.log(`Server is running on http://localhost:${PORT}`);

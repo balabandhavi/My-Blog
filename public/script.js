@@ -72,20 +72,6 @@ async function fetchMessages(){
     }
 }
 
-async function deleteMessage(timestamp){
-    try{
-        const response=await fetch('/messages/${timestamp}',{
-            method: 'DELETE',
-        });
-
-        const result=await response.json();
-        if(!result.success){
-            console.error('Error deleting message:',result.error);
-        }
-    }catch(error){
-        console.error('Error deleting message:',error);
-    }
-}
 async function deleteAllMessages(){
     try{
         const response=await fetch('/messages',
