@@ -1,6 +1,7 @@
 require('dotenv').config(); // dotenv is for managing environment variables securely
 
 const express = require('express');
+const multer=require('multer');
 const bodyParser=require('body-parser');
 
 const bcrypt=require('bcryptjs');  // bcryptjs is for hashing passwords securely
@@ -12,6 +13,8 @@ const {Pool}=require('pg');//importing pg for PostgreSQL
 
 const app=express();
 const PORT=3000;
+
+const upload=multer({dest: 'uploads/'});
 
 //Middleware
 app.use(bodyParser.json());
@@ -176,6 +179,68 @@ const authenticateToken=(req,res,next)=>{
 app.get('/protected', authenticateToken,(req,res)=>{
     res.json({message: `Welcome, ${req.user.email}! You have access to this route.`});
 });
+
+app.post('/posts/draft',async(req,res)=>{
+    const {title,content}=req.body;
+    // const user_id=req.session.user.userId;
+
+    const result=await pool.query(
+        'INSERT INTO posts (title,content,status,userid) VALUES ($1,$2,$3,$4) RETURNING *',
+        [title,content,'draft',req.session.user.userId]
+    );
+
+    res.json({
+        message: 'Draft saved successfully',
+        post: result.rows[0],
+    });
+});
+
+app.post('/posts',async(req,res)=>{
+    const{title,content}=req.body;
+    const result=await pool.query(
+        'INSERT INTO POSTS (title,content,status,userid) VALUES ($1,$2,$3,$4) RETURNING id',
+        [title,content,'published',req.session.user.userId]
+    );
+
+    res.json({
+        message: 'Post published successfully',
+        post: result.rows[0],
+    });
+});
+
+
+app.put('/posts/:id', async(req,res)=>{
+    const{title, content}=req.body;
+    const result=await pool.query(
+        'UPDATE posts SET title = $1, content= $2, updated_at= CURRENT_TIMESTAMP WHERE id= $3 RETURNING *',
+        [title,content,req.params.id]
+    );
+
+    res.json({
+        message: 'Post updated successfully',
+        post: result.rows[0],
+    });
+});
+
+app.delete('/posts/:id', async (req,res)=>{
+    await pool.query('DELETE FROM posts WHERE id= $1',[req.params.id]);
+    res.json({message: 'Post deleted successfully'});
+});
+
+app.post('/posts/:id/image',upload.single('image'), async(req,res)=>{
+    const imageUrl=`/uploads/${req.file.filename}`;
+
+    const result=await pool.query(
+        'INSERT INTO images (post_id,image_url) VALUES ($1, $2) RETURNING *',
+        [req.params.id,imageUrl]
+    );
+
+    res.json({
+        message: 'Image uploaded successfully',
+        image: result.rows[0],
+    });
+});
+
 
 const messages= [];
 

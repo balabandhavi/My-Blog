@@ -52,4 +52,8 @@ document.addEventListener('DOMContentLoaded',async function(){
             console.log('Logout failed: ',error);
         }
     });
+
+    document.getElementById("writePost").addEventListener("click",function(){
+        window.location.href="post.html";
+    });
 });
