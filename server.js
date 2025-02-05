@@ -22,6 +22,7 @@ app.use(express.static('public'));
 app.use(express.json());
 app.use(cors());
 
+app.use('/uploads',express.static('uploads'));
 
 const logger =(req,res,next)=>{
     console.log(`${req.method} request made to: ${req.url}`);
@@ -180,6 +181,27 @@ app.get('/protected', authenticateToken,(req,res)=>{
     res.json({message: `Welcome, ${req.user.email}! You have access to this route.`});
 });
 
+app.get('/posts',async(req,res)=>{
+
+    try{
+        const result=await pool.query(`
+            select posts.id, posts.title,posts.content,posts.created_at,users.userid as username,
+            COALESCE(images.image_url,'') AS image_url
+            FROM posts JOIN users ON posts.userid=users.userid
+            LEFT JOIN images ON posts.id=images.post_id
+            WHERE posts.status='published' ORDER BY posts.created_at DESC`
+        );
+
+        res.json(result.rows);
+    }catch(error){
+
+        console.error('Error fetching posts: ',error);
+        res.status(500).json({
+            message: 'Internal server error'
+        });
+    }
+});
+
 app.post('/posts/draft',async(req,res)=>{
     const {title,content}=req.body;
     // const user_id=req.session.user.userId;
@@ -195,17 +217,46 @@ app.post('/posts/draft',async(req,res)=>{
     });
 });
 
-app.post('/posts',async(req,res)=>{
-    const{title,content}=req.body;
-    const result=await pool.query(
-        'INSERT INTO POSTS (title,content,status,userid) VALUES ($1,$2,$3,$4) RETURNING id',
-        [title,content,'published',req.session.user.userId]
-    );
+// app.post('/posts',async(req,res)=>{
+//     const{title,content}=req.body;
+//     const result=await pool.query(
+//         'INSERT INTO POSTS (title,content,status,userid) VALUES ($1,$2,$3,$4) RETURNING id',
+//         [title,content,'published',req.session.user.userId]
+//     );
 
-    res.json({
-        message: 'Post published successfully',
-        post: result.rows[0],
-    });
+//     res.json({
+//         message: 'Post published successfully',
+//         post: result.rows[0],
+//     });
+// });
+
+app.post('/posts',async(req,res)=>{
+
+    const {title,content,status}=req.body;
+
+    const userId=req.session?.user?.userId;
+    
+
+    if(!userId){
+        return res.status(401).json({
+            error: 'Unauthorized : Please log in first'
+        });
+    }
+
+    try{
+        const result=await pool.query(
+            'INSERT INTO posts (title,content,status,userid) VALUES ($1,$2,$3,$4) RETURNING id',
+            [title,content,status,userId]
+        );
+
+        res.json({
+            message:'Post created successfully',
+            post: result.rows[0]
+        });
+    }catch(error){
+        console.error('Error creating post: ',error);
+        res.status(500).json({error: 'Failed to create post'});
+    }
 });
 
 
