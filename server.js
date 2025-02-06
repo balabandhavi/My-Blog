@@ -292,6 +292,64 @@ app.post('/posts/:id/image',upload.single('image'), async(req,res)=>{
     });
 });
 
+app.post('/posts/:id/comments',async (req,res)=>{
+    const {id}=req.params;
+
+    const {content}=req.body;
+
+    const userId=req.session?.user?.userId;
+
+    if(!userId){
+        return res.status(401).json({error:'Unauthorized: Please log in first'});
+    }
+
+    if(!content || content.trim()===''){
+        return req.status(400).json({error:'Comment content cannot be empty'});
+    }
+
+    try{
+        const result=await pool.query(
+            'Insert INTO comments (post_id,user_id,content) VALUES ($1,$2,$3) returning *',
+            [id,userId,content]
+        );
+
+        res.json({
+            message: 'Comment added successfully',
+            comment: result.rows[0]
+        });
+
+    }catch(error){
+        console.error('Error adding comment: ',error);
+        res.status(500).json({error: 'Failed to add comment'});
+    }
+});
+
+app.get('/posts/:id/comments',async (req,res)=>{
+    const {id}=req.params;
+
+    try{
+        // const result=await pool.query(
+        //     `SELECT comments.content, comments.created_at, users.userid as username from comments from comments
+        //     JOIN users ON comments.user_id=users.userid WHERE comments.post_id=$1 ORDER BY comments.created_at ASC`,
+        //     [id]
+        // );
+
+        const result = await pool.query(`
+            SELECT comments.content, comments.created_at, users.userid AS username 
+            FROM comments 
+            JOIN users ON comments.user_id = users.userid  -- Check if this is correct
+            WHERE comments.post_id = $1 
+            ORDER BY comments.created_at ASC
+        `, [id]);
+        
+        res.json(result.rows);
+
+    }catch(error){
+        console.error('Error fetching comments: ',error);
+        res.status(500).json({error: 'Failed to fetch comments'});
+    }
+});
+
 
 const messages= [];
 
