@@ -1,3 +1,31 @@
+async function fetchComments(postId) {
+    try {
+        const response = await fetch(`/posts/${postId}/comments`);
+
+        if (!response.ok) {
+            throw new Error('Failed to fetch comments. Server responded with an error.');
+        }
+
+        const comments = await response.json();
+        const commentsList = document.getElementById(`comments-list-${postId}`);
+
+        commentsList.innerHTML = '';  
+
+        comments.forEach(comment => {
+            const li = document.createElement('li');
+            li.textContent = `${comment.username}: ${comment.content}`;
+            commentsList.appendChild(li);
+        });
+
+    } catch (error) {
+        console.error('Error fetching comments:', error);
+        alert('Could not update comments. Please refresh the page.');  
+    }
+}
+
+
+
+
 document.addEventListener('DOMContentLoaded', async () => {
     const postsContainer = document.getElementById('posts-container');
 
@@ -38,25 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             postsContainer.innerHTML = '<p> Failed to load posts.</p>';
         }
     }
-
-    async function fetchComments(postId) {
-        try {
-            const response = await fetch(`/posts/${postId}/comments`);
-            const comments = await response.json();
-            const commentsList = document.getElementById(`comments-list-${postId}`);
-
-            commentsList.innerHTML = '';
-            comments.forEach(comment => {
-                const li = document.createElement('li');
-                li.textContent = `${comment.username}: ${comment.content}`;
-                commentsList.appendChild(li);
-            });
-
-        } catch (error) {
-            console.error('Error fetching comments: ', error);
-        }
-    }
-
     fetchPosts();  
 });
 
@@ -80,18 +89,20 @@ async function submitComment(postId) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ content }),
         });
-
-        const data=await response.json();
-
-        if (response.ok) {
+    
+        const data = await response.json();  
+    
+        if (response.ok) {  
             alert('Comment added successfully!');
             textarea.value = '';  
             fetchComments(postId);  
         } else {
-            alert(data.error || 'Failed to add comment');
+            console.error('Server error:', data);  
+            alert(data.error || 'Failed to add comment.');
         }
     } catch (error) {
-        console.error('Error adding comment:', error);
-        alert('Failed to add comment');
+        console.error('Network error:', error);  
+        alert('Failed to add comment. Please try again.');
     }
+    
 }

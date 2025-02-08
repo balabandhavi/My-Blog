@@ -319,7 +319,7 @@ app.post('/posts/:id/comments',async (req,res)=>{
         });
 
     }catch(error){
-        console.error('Error adding comment: ',error);
+        console.error('Error adding comment1: ',error);
         res.status(500).json({error: 'Failed to add comment'});
     }
 });
