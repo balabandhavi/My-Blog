@@ -185,7 +185,7 @@ app.get('/posts',async(req,res)=>{
 
     try{
         const result=await pool.query(`
-            select posts.id, posts.title,posts.content,posts.created_at,users.userid as username,
+            select posts.id, posts.title,posts.content,posts.likes,posts.created_at,users.userid as username,
             COALESCE(images.image_url,'') AS image_url
             FROM posts JOIN users ON posts.userid=users.userid
             LEFT JOIN images ON posts.id=images.post_id
@@ -245,10 +245,10 @@ app.post('/posts',async(req,res)=>{
 
     try{
         const result=await pool.query(
-            'INSERT INTO posts (title,content,status,userid) VALUES ($1,$2,$3,$4) RETURNING id',
-            [title,content,status,userId]
+            'INSERT INTO posts (title,content,status,userid,likes) VALUES ($1,$2,$3,$4,$5) RETURNING id',
+            [title,content,status,userId,0]
         );
-
+        
         res.json({
             message:'Post created successfully',
             post: result.rows[0]
@@ -347,6 +347,26 @@ app.get('/posts/:id/comments',async (req,res)=>{
     }catch(error){
         console.error('Error fetching comments: ',error);
         res.status(500).json({error: 'Failed to fetch comments'});
+    }
+});
+
+app.post('/posts/:id/like',async(req,res)=>{
+    const {id}=req.params;
+
+    try{
+        const result=await pool.query(
+            'UPDATE posts SET likes=likes+1 WHERE id=$1 RETURNING likes',
+        [id]);
+
+        if(result.rowCount===0){
+            return res.status(404).json({error: 'Post not found'});
+        }
+
+        res.json({success: true,likes: result.rows[0].likes});
+
+    }catch(error){
+        console.error('Error liking post: ',error);
+        res.status(500).json({error: 'Failed to like post'});
     }
 });
 

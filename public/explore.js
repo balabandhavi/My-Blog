@@ -24,6 +24,24 @@ async function fetchComments(postId) {
 }
 
 
+async function likePost(postId){
+    try{
+        const response=await fetch(`/posts/${postId}/like`,{method: 'POST'});
+        const data=await response.json();
+
+        if(response.ok){
+            document.getElementById(`likes-count-${postId}`).textContent=data.likes;
+
+        }else{
+            alert(data.error || 'Failed to like post.');
+        }
+    }catch(error){
+        console.error('Error liking post: ',error);
+        alert('Failed to like post.');
+    }
+}
+
+
 
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -48,6 +66,9 @@ document.addEventListener('DOMContentLoaded', async () => {
                 <p><strong> By ${post.username}</strong></p>
                 <p> ${post.content}</p>
                 ${post.image_url ? `<img src="${post.image_url}" alt="Post Image">` : ''}
+
+                <p><strong> Likes: <span id="likes-count-${post.id}"> ${post.likes}</span></strong></p>
+                <button onclick="likePost(${post.id})">Like</button>
 
                 <div class="comments-section">
                     <h3>Comments</h3>
