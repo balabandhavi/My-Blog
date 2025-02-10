@@ -60,6 +60,7 @@ app.use(session({
 }));
 
 const path = require("path");
+const { error } = require('console');
 
 app.get('/',(req,res)=>{
     res.sendFile(path.join(__dirname, "public", "index.html"));
@@ -337,7 +338,7 @@ app.get('/posts/:id/comments',async (req,res)=>{
         const result = await pool.query(`
             SELECT comments.content, comments.created_at, users.userid AS username 
             FROM comments 
-            JOIN users ON comments.user_id = users.userid  -- Check if this is correct
+            JOIN users ON comments.user_id = users.userid  
             WHERE comments.post_id = $1 
             ORDER BY comments.created_at ASC
         `, [id]);
@@ -367,6 +368,71 @@ app.post('/posts/:id/like',async(req,res)=>{
     }catch(error){
         console.error('Error liking post: ',error);
         res.status(500).json({error: 'Failed to like post'});
+    }
+});
+
+app.post('/bookmarks/:postId', async (req,res)=>{
+    const userId=req.session?.user?.userId;
+    const postId=req.params.postId;
+
+    if(!userId){
+        return res.status(401).json({error: 'Unauthorized: Please log in first'});
+    }
+
+    try{
+        await pool.query('Insert into bookmarks (user_id,post_id) values ($1,$2) on conflict do nothing',
+            [userId,postId]
+        );
+
+        res.json({ message: 'Post bookmarked successfully!'});
+    }catch(error){
+        console.error('Error bookmarking post: ',error);
+        res.status(500).json({error: 'Failed to bookmark post'});
+    }
+    
+});
+
+app.delete('/bookmarks/:postId', async (req,res)=>{
+    const userId=req.session?.user?.userId;
+    const postId=req.params.postId;
+
+    if(!userId){
+        return res.status(401).json({error : 'Unauthorized: PLease log in first'});
+    }
+
+    try{
+        const result=await pool.query('Delete from bookmarks where user_id=$1 and post_id=$2',
+            [userId,postId]
+        );
+
+        if(result.rowCount===0){
+            return res.status(404).json({error: 'Bookmark not found'});
+        }
+
+        res.json({ message: 'Bookmark removed successfully!'});
+    }catch(error){
+        console.error('Error removing bookmark: ',error);
+        res.status(500).json({ error : 'Failed to remove bookmark'});
+    }
+});
+
+app.get('/bookmarks',async (req,res)=>{
+    const userId=req.session?.user?.userId;
+
+    if(!userId){
+        return res.status(401).json({ error : 'Unauthorized: Please log in first'});
+    }
+
+    try{
+        const result=await pool.query(`Select posts.id,posts.title, posts.content, posts.imsge_url,posts.creayed_at
+            from bookmarks join posts on bookmarks.post_id=posts.id
+            where bookmarks.user_id=$1 order by bookmarks.created_at desc`,
+        [userId]);
+
+        res.json(result.rows);
+    }catch(error){
+        console.error('Error fetching bookmarks: ',error);
+        res.status(500).json({ error: 'Failed to fetch bookmarks'});
     }
 });
 

@@ -69,7 +69,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
                 <p><strong> Likes: <span id="likes-count-${post.id}"> ${post.likes}</span></strong></p>
                 <button onclick="likePost(${post.id})">Like</button>
-
+                <button class="bookmark-btn" data-post-id="${post.id}"> Bookmark</button>
                 <div class="comments-section">
                     <h3>Comments</h3>
                     <ul id="comments-list-${post.id}"></ul>
@@ -81,12 +81,43 @@ document.addEventListener('DOMContentLoaded', async () => {
                 postsContainer.appendChild(postElement);
 
                 fetchComments(post.id);
+                addBookMarkListeners();
             });
         } catch (error) {
             console.error('Error fetching posts:', error);
             postsContainer.innerHTML = '<p> Failed to load posts.</p>';
+        }    
+    }
+
+    async function toggleBookMark(postId,button){
+        try{
+            const isBookmarked=button.classList.contains('bookmarked');
+
+            const response=await fetch(`/bookmarks/${postId}`,{
+                method : isBookmarked ? 'DELETE' : 'POST',
+                credentials: 'include',
+            });
+
+            if(response.ok){
+                button.classList.toggle('bookmarked');
+                button.textContent=isBookmarked? 'Bookmark' : 'Bookmarked';
+            }else{
+                alert('Failed to update bookmark status.');
+            }
+        }catch(error){
+            console.error('Error toggling bookmark: ',error);
         }
     }
+
+    function addBookMarkListeners(){
+        document.querySelectorAll('.bookmark-btn').forEach(button=>{
+            button.addEventListener('click', ()=>{
+                const postId=button.getAttribute('data-post-id');
+                toggleBookMark(postId,button);
+            });
+        });
+    }
+
     fetchPosts();  
 });
 
