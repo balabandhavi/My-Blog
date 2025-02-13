@@ -1,18 +1,25 @@
-/* Apply a modern font */
-body {
-    font-family: 'Poppins', sans-serif;
+/* General Styles */
+* {
     margin: 0;
     padding: 0;
-    background-color: #7E99A3;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    color: black;
+    box-sizing: border-box;
+    font-family: 'Poppins', sans-serif;
 }
 
-/* Center Forms Properly */
+/* Default Light Mode */
+body {
+    background-color: white;
+    color: black;
+    transition: background 0.3s, color 0.3s;
+}
+
+/* Dark Mode */
+body.dark-mode {
+    background-color: #121212;
+    color: #ffffff;
+}
+
+/* Form Containers */
 #login-form, #signup-form {
     background-color: #ffffff;
     padding: 25px;
@@ -22,6 +29,13 @@ body {
     max-width: 100%;
     text-align: center;
     margin-top: 30px;
+}
+
+.dark-mode #login-form, 
+.dark-mode #signup-form {
+    background-color: #1e1e1e;
+    color: white;
+    border: 1px solid #333;
 }
 
 /* Titles */
@@ -42,12 +56,15 @@ label {
     margin-bottom: 5px;
 }
 
-/* Input Fields */
-input[type="email"], input[type="password"], #signup-form input[type="text"], #login-form input[type="text"] {
+/* Inputs */
+input[type="email"], 
+input[type="password"], 
+#signup-form input[type="text"], 
+#login-form input[type="text"],
+textarea {
     width: 100%;
     padding: 12px;
-    margin: 10px -10px;
-
+    margin: 10px 0;
     border: 1px solid #ccc;
     border-radius: 6px;
     font-size: 14px;
@@ -55,14 +72,19 @@ input[type="email"], input[type="password"], #signup-form input[type="text"], #l
     transition: border 0.3s ease-in-out;
 }
 
-
-
-input[type="email"]:focus, input[type="password"]:focus {
+input:focus, textarea:focus {
     border-color: #007bff;
     outline: none;
 }
 
-/* Button Styling */
+.dark-mode input, 
+.dark-mode textarea {
+    background-color: #333;
+    color: white;
+    border: 1px solid #555;
+}
+
+/* Buttons */
 button {
     width: 100%;
     padding: 12px;
@@ -79,7 +101,22 @@ button:hover {
     background-color: #003d7a;
 }
 
-/* Footer Styling */
+/* Dark Mode Button */
+#theme-toggle {
+    padding: 10px 20px;
+    margin: 10px;
+    cursor: pointer;
+    border: none;
+    background-color: #007bff;
+    color: white;
+    border-radius: 5px;
+}
+
+#theme-toggle:hover {
+    background-color: #0056b3;
+}
+
+/* Footer */
 footer {
     background-color: #4C585B;
     color: wheat;
@@ -90,29 +127,12 @@ footer {
     bottom: 0;
 }
 
-/* Error & Success Messages */
-.error {
-    color: red;
-    font-size: 14px;
-    text-align: center;
-    margin-top: 10px;
+.dark-mode footer {
+    background-color: #333;
+    color: white;
 }
 
-.success {
-    color: green;
-    font-size: 14px;
-    text-align: center;
-    margin-top: 10px;
-}
-
-#caption{
-    font-family: Georgia, 'Times New Roman', Times, serif;
-    font-size: large;
-    font-weight: bolder;
-    color: crimson;
-}
-
-
+/* Posts Container */
 #posts-container {
     max-width: 80%;
     margin: auto;
@@ -121,15 +141,7 @@ footer {
     max-height: 80vh; 
 }
 
-
-html, body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-    overflow-y: auto; 
-}
-
-
+/* Posts */
 .post {
     background: #f9f9f9;
     padding: 20px;
@@ -141,8 +153,13 @@ html, body {
     overflow-y: auto;  
 }
 
+.dark-mode .post {
+    background-color: #1e1e1e;
+    color: white;
+    border: 1px solid #333;
+}
 
-
+/* Post Images */
 .post img {
     max-width: 100%;  
     height: auto;
@@ -151,6 +168,7 @@ html, body {
     border-radius: 5px;
 }
 
+/* Comments Section */
 #comments-section {
     margin-top: 20px;
 }
@@ -167,6 +185,11 @@ html, body {
     border-radius: 5px;
 }
 
+.dark-mode #comments-list li {
+    background-color: #2a2a2a;
+}
+
+/* Comment Input */
 #comment-content {
     width: 100%;
     height: 100px;
@@ -176,6 +199,12 @@ html, body {
     border-radius: 5px;
 }
 
+.dark-mode #comment-content {
+    background-color: #333;
+    color: white;
+}
+
+/* Submit Comment */
 #submit-comment {
     background-color: #4CAF50;
     color: white;
@@ -190,7 +219,33 @@ html, body {
     background-color: #45a049;
 }
 
+/* Theme Selection */
+.theme-selector {
+    margin: 10px;
+}
 
+.theme-selector label {
+    margin-right: 10px;
+    font-weight: bold;
+}
 
+.theme-selector select {
+    padding: 5px;
+    border-radius: 5px;
+}
 
+/* Custom Themes */
+body.blue-theme {
+    background-color: #1e3a8a;
+    color: white;
+}
 
+body.red-theme {
+    background-color: #8b0000;
+    color: white;
+}
+
+body.green-theme {
+    background-color: #004d00;
+    color: white;
+}
